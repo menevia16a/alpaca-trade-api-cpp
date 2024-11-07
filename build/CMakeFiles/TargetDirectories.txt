@@ -1,0 +1,3 @@
+/home/veil/QtProjects/StockHound/ThirdParty/alpaca-trade-api-cpp/build/CMakeFiles/alpaca.dir
+/home/veil/QtProjects/StockHound/ThirdParty/alpaca-trade-api-cpp/build/CMakeFiles/edit_cache.dir
+/home/veil/QtProjects/StockHound/ThirdParty/alpaca-trade-api-cpp/build/CMakeFiles/rebuild_cache.dir
