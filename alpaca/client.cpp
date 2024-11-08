@@ -1268,4 +1268,59 @@ void Client::logResponseDetails(const std::unique_ptr<httplib::Response>& respon
     }
 }
 
+std::pair<Status, std::unordered_map<std::string, Trade>> Client::getLatestTrades(const std::vector<std::string>& symbols) const {
+    std::unordered_map<std::string, Trade> trades;
+    if (symbols.empty()) {
+        return {Status(true, "No symbols provided"), trades};
+    }
+
+    // Construct endpoint with multiple symbols
+    std::string symbol_param = symbols[0];
+    for (size_t i = 1; i < symbols.size(); ++i) {
+        symbol_param += "," + symbols[i];
+    }
+    std::string endpoint = "/v2/stocks/" + symbol_param + "/trades/latest";
+
+    // Initialize HTTP client
+    httplib::Client client(environment_.getAPIBaseURL());
+    client.set_follow_location(false);
+    client.set_default_headers(headers(environment_));
+
+    // Perform GET request to retrieve trade data
+    auto res = client.Get(endpoint.c_str());
+    if (!res) {
+        return {Status(false, "HTTP request failed"), trades};
+    }
+    if (res->status != 200) {
+        return {Status(false, "HTTP error: " + std::to_string(res->status)), trades};
+    }
+
+    // Parse the JSON response
+    rapidjson::Document doc;
+    doc.Parse(res->body.c_str());
+    if (doc.HasParseError()) {
+        return {Status(false, "Failed to parse JSON response"), trades};
+    }
+
+    // Process each symbol's trade data
+    if (doc.HasMember("trades") && doc["trades"].IsObject()) {
+        for (auto& m : doc["trades"].GetObject()) {
+            std::string symbol = m.name.GetString();
+            const auto& trade_info = m.value;
+
+            // Extract trade details
+            Trade trade;
+            if (trade_info.HasMember("p") && trade_info["p"].IsDouble()) {
+                trade.price = trade_info["p"].GetDouble();
+            }
+            if (trade_info.HasMember("t") && trade_info["t"].IsString()) {
+                trade.timestamp = trade_info["t"].GetString();
+            }
+            trades[symbol] = trade;
+        }
+    }
+
+    return {Status(true), trades};
+}
+
 } // namespace alpaca
