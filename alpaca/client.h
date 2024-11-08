@@ -71,6 +71,7 @@ class Client {
   std::unique_ptr<httplib::Response> handleRedirect(httplib::Client& client, const std::string& path, const httplib::Headers& headers, int max_redirects = 5) const;
   void logResponseDetails(const std::unique_ptr<httplib::Response>& response) const;
   std::pair<Status, std::unordered_map<std::string, Trade>> getLatestTrades(const std::vector<std::string>& symbols) const;
+  uint64_t parseTimestamp(const std::string& timestamp) const;
   /**
    * @brief Fetch Alpaca account configuration information.
    *

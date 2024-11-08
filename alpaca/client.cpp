@@ -4,6 +4,10 @@
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+
 namespace alpaca {
 const char* kJSONContentType = "application/json";
 
@@ -1314,7 +1318,7 @@ std::pair<Status, std::unordered_map<std::string, Trade>> Client::getLatestTrade
                 trade.price = trade_info["p"].GetDouble();
             }
             if (trade_info.HasMember("t") && trade_info["t"].IsString()) {
-                trade.timestamp = trade_info["t"].GetString();
+                trade.timestamp = parseTimestamp(trade_info["t"].GetString());
             }
             trades[symbol] = trade;
         }
@@ -1323,4 +1327,10 @@ std::pair<Status, std::unordered_map<std::string, Trade>> Client::getLatestTrade
     return {Status(true), trades};
 }
 
+uint64_t Client::parseTimestamp(const std::string& timestamp) const {
+    std::tm tm = {};
+    std::istringstream ss(timestamp);
+    ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");  // Adjust format based on timestamp precision
+    return static_cast<uint64_t>(std::mktime(&tm));
+}
 } // namespace alpaca
