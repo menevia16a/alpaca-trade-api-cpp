@@ -21,8 +21,8 @@ Status Environment::parse() {
   if (auto e = std::getenv(api_base_url_env_var_.c_str())) {
     api_base_url_ = std::string(e);
   } else {
-    LOG(WARNING) << api_base_url_env_var_ << " not set so defaulting to using the paper URL: " << kAPIBaseURLPaper;
-    api_base_url_ = kAPIBaseURLPaper;
+    LOG(WARNING) << api_base_url_env_var_ << " not set so defaulting to using the paper URL: " << kAPIBaseURL;
+    api_base_url_ = kAPIBaseURL;
   }
 
   if (auto e = std::getenv(api_data_url_env_var_.c_str())) {

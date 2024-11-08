@@ -1,5 +1,7 @@
 #pragma once
 
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+
 #include "account.h"
 #include "asset.h"
 #include "bars.h"
@@ -13,6 +15,7 @@
 #include "status.h"
 #include "trade.h"
 #include "watchlist.h"
+#include "httplib.h"
 
 #include <string>
 #include <utility>
@@ -65,7 +68,8 @@ class Client {
    * alpaca::Account object.
    */
   std::pair<Status, Account> getAccount() const;
-
+  std::unique_ptr<httplib::Response> handleRedirect(httplib::Client& client, const std::string& path, const httplib::Headers& headers, int max_redirects = 5) const;
+  void logResponseDetails(const std::unique_ptr<httplib::Response>& response) const;
   /**
    * @brief Fetch Alpaca account configuration information.
    *

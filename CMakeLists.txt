@@ -20,13 +20,14 @@ include_directories(${SYSTEM_INCLUDE_DIR})
 add_library(alpaca STATIC ${ALPACA_SOURCES})
 
 # Link necessary libraries
+find_package(OpenSSL REQUIRED)
 find_package(CURL REQUIRED)
 find_package(glog REQUIRED)
 find_package(jsoncpp REQUIRED)
 
 target_include_directories(alpaca PRIVATE ${SYSTEM_LIB_DIR}/cmake/httplib)
-
 target_link_libraries(alpaca PRIVATE ${SYSTEM_LIB_DIR}/libwebsockets.so)
+target_link_libraries(alpaca PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(alpaca PRIVATE CURL::libcurl)
 target_link_libraries(alpaca PRIVATE glog::glog)
 target_link_libraries(alpaca PRIVATE jsoncpp)

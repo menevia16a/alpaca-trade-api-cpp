@@ -7,13 +7,10 @@
 namespace alpaca {
 
 /// The base URL for API calls to the live trading API
-const std::string kAPIBaseURLLive = "api.alpaca.markets";
-
-/// The base URL for API calls to the paper trading API
-const std::string kAPIBaseURLPaper = "paper-api.alpaca.markets";
+const std::string kAPIBaseURL = "https://paper-api.alpaca.markets";
 
 /// The base URL for API calls to the data API
-const std::string kAPIDataURL = "data.alpaca.markets";
+const std::string kAPIDataURL = "https://data.alpaca.markets";
 
 /**
  * @brief A class to help witth parsing required variables from the environment.
