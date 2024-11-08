@@ -410,9 +410,7 @@ class Client {
    * success or faliure of the operation and the second element is a vector of
    * alpaca::Asset objects.
    */
-  std::pair<Status, std::vector<Asset>> getAssets(const ActionStatus asset_status = ActionStatus::Active,
-                                                  const AssetClass asset_class = AssetClass::USEquity) const;
-
+  std::pair<Status, std::vector<Asset>> getAssets(const AssetClass asset_class = AssetClass::USEquity, const ActionStatus asset_status = ActionStatus::Active, const std::string& exchange = "NYSE") const;
   /**
    * @brief Fetch an asset for a given symbol.
    *

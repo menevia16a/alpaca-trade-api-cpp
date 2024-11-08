@@ -643,11 +643,11 @@ std::pair<Status, std::vector<Position>> Client::closePositions() const {
 
     DLOG(INFO) << "Response from /v2/positions: " << resp->body;
 
-    rapidjson::Document d;
-    if (d.Parse(resp->body.c_str()).HasParseError()) {
+    rapidjson::Document doc;
+    if (doc.Parse(resp->body.c_str()).HasParseError()) {
         return std::make_pair(Status(1, "Received parse error when deserializing positions JSON"), positions);
     }
-    for (auto& o : d.GetArray()) {
+    for (auto& o : doc.GetArray()) {
         Position position;
         rapidjson::StringBuffer s;
         s.Clear();
@@ -691,25 +691,18 @@ std::pair<Status, Position> Client::closePosition(const std::string& symbol) con
     return std::make_pair(position.fromJSON(resp->body), position);
 }
 
-std::pair<Status, std::vector<Asset>> Client::getAssets(const ActionStatus asset_status,
-                                                        const AssetClass asset_class) const {
+
+std::pair<Status, std::vector<Asset>> Client::getAssets(const AssetClass asset_class, const ActionStatus asset_status, const std::string& exchange) const {
     std::vector<Asset> assets;
+    std::string classParam = assetClassToString(asset_class);
+    std::string statusParam = actionStatusToString(asset_status);
 
-    httplib::Params params{
-                           {"status", actionStatusToString(asset_status)},
-                           {"asset_class", assetClassToString(asset_class)},
-                           };
-    auto query_string = httplib::detail::params_to_query_str(params);
-    auto url = "/v2/assets?" + query_string;
+    std::string url = "/v2/assets?asset_class=" + classParam + "&status=" + statusParam + "&exchange=" + exchange + "&tradable=true";
 
-    httplib::Client client(environment_.getAPIBaseURL());
-    client.set_follow_location(false);
     DLOG(INFO) << "Making request to: " << url;
+    httplib::Client client(environment_.getAPIBaseURL());
     DLOG(INFO) << "Sending GET request to " << url;
-    DLOG(INFO) << "Headers:";
-    for (const auto& h : headers(environment_)) {
-        DLOG(INFO) << h.first << ": " << h.second;
-    }
+
     auto resp = client.Get(url.c_str(), headers(environment_));
     if (!resp) {
         std::ostringstream ss;
@@ -725,11 +718,14 @@ std::pair<Status, std::vector<Asset>> Client::getAssets(const ActionStatus asset
 
     DLOG(INFO) << "Response from " << url << ": " << resp->body;
 
-    rapidjson::Document d;
-    if (d.Parse(resp->body.c_str()).HasParseError()) {
-        return std::make_pair(Status(1, "Received parse error when deserializing assets JSON"), assets);
+    // Parse the JSON response
+    rapidjson::Document doc;
+    if (doc.Parse(resp->body.c_str()).HasParseError()) {
+        return std::make_pair(Status(1, "JSON parse error"), assets);
     }
-    for (auto& o : d.GetArray()) {
+
+    // Append assets from the current response
+    for (auto& o : doc.GetArray()) {
         Asset asset;
         rapidjson::StringBuffer s;
         s.Clear();
@@ -750,7 +746,6 @@ std::pair<Status, Asset> Client::getAsset(const std::string& symbol) const {
     auto url = "/v2/assets/" + symbol;
 
     httplib::Client client(environment_.getAPIBaseURL());
-    client.set_follow_location(false);
     DLOG(INFO) << "Making request to: " << url;
     DLOG(INFO) << "Sending GET request to " << url;
     DLOG(INFO) << "Headers:";
@@ -1274,24 +1269,27 @@ void Client::logResponseDetails(const std::unique_ptr<httplib::Response>& respon
 
 std::pair<Status, std::unordered_map<std::string, Trade>> Client::getLatestTrades(const std::vector<std::string>& symbols) const {
     std::unordered_map<std::string, Trade> trades;
+
     if (symbols.empty()) {
         return {Status(true, "No symbols provided"), trades};
     }
 
-    // Construct endpoint with multiple symbols
+    // Construct the comma-separated symbols parameter
     std::string symbol_param = symbols[0];
+
     for (size_t i = 1; i < symbols.size(); ++i) {
         symbol_param += "," + symbols[i];
     }
-    std::string endpoint = "/v2/stocks/" + symbol_param + "/trades/latest";
+
+    std::string endpoint = "/v2/stocks/snapshots?symbols=" + symbol_param;
 
     // Initialize HTTP client
-    httplib::Client client(environment_.getAPIBaseURL());
-    client.set_follow_location(false);
+    httplib::Client client(environment_.getAPIDataURL());
     client.set_default_headers(headers(environment_));
 
-    // Perform GET request to retrieve trade data
+    // Perform GET request to retrieve snapshot data
     auto res = client.Get(endpoint.c_str());
+
     if (!res) {
         return {Status(false, "HTTP request failed"), trades};
     }
@@ -1302,29 +1300,32 @@ std::pair<Status, std::unordered_map<std::string, Trade>> Client::getLatestTrade
     // Parse the JSON response
     rapidjson::Document doc;
     doc.Parse(res->body.c_str());
+
     if (doc.HasParseError()) {
         return {Status(false, "Failed to parse JSON response"), trades};
     }
 
-    // Process each symbol's trade data
-    if (doc.HasMember("trades") && doc["trades"].IsObject()) {
-        for (auto& m : doc["trades"].GetObject()) {
-            std::string symbol = m.name.GetString();
-            const auto& trade_info = m.value;
+    // Process each symbol's snapshot data
+    for (const auto& symbol : symbols) {
+        if (doc.HasMember(symbol.c_str()) && doc[symbol.c_str()].IsObject()) {
+            const auto& snapshot = doc[symbol.c_str()];
+            if (snapshot.HasMember("latestTrade") && snapshot["latestTrade"].IsObject()) {
+                const auto& trade_info = snapshot["latestTrade"];
 
-            // Extract trade details
-            Trade trade;
-            if (trade_info.HasMember("p") && trade_info["p"].IsDouble()) {
-                trade.price = trade_info["p"].GetDouble();
+                // Extract trade details
+                Trade trade;
+                if (trade_info.HasMember("p") && trade_info["p"].IsDouble()) {
+                    trade.price = trade_info["p"].GetDouble();
+                }
+                if (trade_info.HasMember("t") && trade_info["t"].IsString()) {
+                    trade.timestamp = parseTimestamp(trade_info["t"].GetString());
+                }
+                trades[symbol] = trade;
             }
-            if (trade_info.HasMember("t") && trade_info["t"].IsString()) {
-                trade.timestamp = parseTimestamp(trade_info["t"].GetString());
-            }
-            trades[symbol] = trade;
         }
     }
 
-    return {Status(true), trades};
+    return {Status(), trades};
 }
 
 uint64_t Client::parseTimestamp(const std::string& timestamp) const {
