@@ -7,7 +7,7 @@
 namespace alpaca {
 
 /// The base URL for API calls to the live trading API
-const std::string kAPIBaseURL = "https://paper-api.alpaca.markets";
+const std::string kAPIBaseURL = "https://api.alpaca.markets";
 
 /// The base URL for API calls to the data API
 const std::string kAPIDataURL = "https://data.alpaca.markets";
