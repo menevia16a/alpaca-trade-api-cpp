@@ -1132,16 +1132,11 @@ std::pair<Status, PortfolioHistory> Client::getPortfolioHistory(const std::strin
     return std::make_pair(portfolio_history.fromJSON(resp->body), portfolio_history);
 }
 
-std::pair<Status, Bars> Client::getBars(const std::vector<std::string>& symbols,
-                                        const std::string& start,
-                                        const std::string& end,
-                                        const std::string& after,
-                                        const std::string& until,
-                                        const std::string& timeframe,
-                                        const uint limit) const {
+std::pair<Status, Bars> Client::getBars(const std::vector<std::string>& symbols, const std::string& start, const std::string& end, const std::string& after, const std::string& until, const std::string& timeframe, const uint limit) const {
     Bars bars;
 
     std::string symbols_string = "";
+
     for (auto i = 0; i < symbols.size(); ++i) {
         symbols_string += symbols[i];
         symbols_string += ",";
