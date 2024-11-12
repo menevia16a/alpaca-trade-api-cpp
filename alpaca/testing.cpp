@@ -3,30 +3,30 @@
 #include <random>
 
 namespace alpaca {
+    alpaca::Client testClient() {
+        auto env = alpaca::Environment();
+        auto parse_status = env.parse();
 
-alpaca::Client testClient() {
-  auto env = alpaca::Environment();
-  auto parse_status = env.parse();
-  EXPECT_OK(parse_status);
-  return alpaca::Client(env);
-}
+        EXPECT_OK(parse_status);
 
-std::string randomString(size_t length) {
-  static auto& chrs =
-      "0123456789"
-      "abcdefghijklmnopqrstuvwxyz"
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        return alpaca::Client(env);
+    }
 
-  thread_local static std::mt19937 rg{std::random_device{}()};
-  thread_local static std::uniform_int_distribution<std::string::size_type> pick(0, sizeof(chrs) - 2);
+    std::string randomString(size_t length) {
+        static auto& chrs =
+            "0123456789"
+            "abcdefghijklmnopqrstuvwxyz"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-  std::string s;
-  s.reserve(length);
+        thread_local static std::mt19937 rg{std::random_device{}()};
+        thread_local static std::uniform_int_distribution<std::string::size_type> pick(0, sizeof(chrs) - 2);
+        std::string s;
 
-  while (length--) {
-    s += chrs[pick(rg)];
-  }
+        s.reserve(length);
 
-  return s;
-}
+        while (length--)
+            s += chrs[pick(rg)];
+
+        return s;
+    }
 } // namespace alpaca

@@ -7,6 +7,7 @@
 class StatusTest : public ::testing::Test {};
 
 TEST_F(StatusTest, testStatusConstructor) {
-  auto status = alpaca::Status();
-  EXPECT_OK(status);
+    auto status = alpaca::Status();
+
+    EXPECT_OK(status);
 }

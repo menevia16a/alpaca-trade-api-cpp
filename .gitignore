@@ -1,2 +1,5 @@
 .env
 .vscode
+
+# Build Directory
+build/*
