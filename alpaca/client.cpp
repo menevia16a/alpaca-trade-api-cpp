@@ -1091,83 +1091,52 @@ namespace alpaca {
 
     std::pair<Status, Bars> Client::getBars(const std::vector<std::string>& symbols, const std::string& start, const std::string& end, const std::string& after, const std::string& until, const std::string& timeframe, const uint limit, const std::string& userAgent) const {
         Bars bars;
-        std::string symbols_string = "";
 
-        for (auto i = 0; i < symbols.size(); ++i) {
-            symbols_string += symbols[i];
-            symbols_string += ",";
-        }
-
-        symbols_string.pop_back();
-        httplib::Params params {
-            {"symbols", symbols_string},
-            {"limit", std::to_string(limit)},
-            {"timeframe", timeframe},
-        };
-
-        if (start != "") {
-            params.insert({"start", start});
-        }
-
-        if (end != "") {
-            params.insert({"end", end});
-        }
-
-        if (after != "") {
-            params.insert({"after", after});
-        }
-
-        if (until != "") {
-            params.insert({"until", until});
-        }
-
-        auto query_string = httplib::detail::params_to_query_str(params);
-        auto url = "/v2/bars/" + timeframe + "?" + query_string;
         httplib::Client client(environment_.getAPIDataURL());
-        auto resp = client.Get(url.c_str(), headers(environment_, userAgent));
+        client.set_default_headers(headers(environment_, userAgent)); // Set headers before requests
 
-        if (!resp) {
-            std::ostringstream ss;
+        for (const auto& symbol : symbols) {
+            httplib::Params params {
+                {"timeframe", timeframe},
+                {"limit", std::to_string(limit)}
+            };
 
-            ss << "Call to " << url << " returned an empty response";
+            if (!start.empty())
+                params.insert({"start", start});
 
-            return std::make_pair(Status(1, ss.str()), bars);
+            if (!end.empty())
+                params.insert({"end", end});
+
+            if (!after.empty())
+                params.insert({"after", after});
+
+            if (!until.empty())
+                params.insert({"until", until});
+
+            auto query_string = httplib::detail::params_to_query_str(params);
+            std::string url = "/v2/stocks/" + symbol + "/bars?" + query_string;
+            auto resp = client.Get(url.c_str());
+
+            if (!resp) {
+                std::ostringstream ss;
+                ss << "Call to " << url << " returned an empty response";
+                return std::make_pair(Status(1, ss.str()), bars);
+            }
+
+            if (resp->status != 200) {
+                std::ostringstream ss;
+                ss << "Call to " << url << " returned an HTTP " << resp->status << ": " << resp->body;
+                return std::make_pair(Status(1, ss.str()), bars);
+            }
+
+            // Parse the JSON response and add it to `bars`
+            Status parseStatus = bars.fromJSON(resp->body);
+            if (!parseStatus.ok()) {
+                return std::make_pair(parseStatus, bars);
+            }
         }
 
-        if (resp->status != 200) {
-            std::ostringstream ss;
-
-            ss << "Call to " << url << " returned an HTTP " << resp->status << ": " << resp->body;
-
-            return std::make_pair(Status(1, ss.str()), bars);
-        }
-
-        return std::make_pair(bars.fromJSON(resp->body), bars);
-    }
-
-    std::pair<Status, LastTrade> Client::getLastTrade(const std::string& symbol, const std::string& userAgent) const {
-        LastTrade last_trade;
-        auto url = "/v2/last/stocks/" + symbol;
-        httplib::Client client(environment_.getAPIDataURL());
-        auto resp = client.Get(url.c_str(), headers(environment_, userAgent));
-
-        if (!resp) {
-            std::ostringstream ss;
-
-            ss << "Call to " << url << " returned an empty response";
-
-            return std::make_pair(Status(1, ss.str()), last_trade);
-        }
-
-        if (resp->status != 200) {
-            std::ostringstream ss;
-
-            ss << "Call to " << url << " returned an HTTP " << resp->status << ": " << resp->body;
-
-            return std::make_pair(Status(1, ss.str()), last_trade);
-        }
-
-        return std::make_pair(last_trade.fromJSON(resp->body), last_trade);
+        return std::make_pair(Status(), bars);
     }
 
     std::pair<Status, LastQuote> Client::getLastQuote(const std::string& symbol, const std::string& userAgent) const {
@@ -1209,12 +1178,12 @@ namespace alpaca {
             symbol_param += "," + symbols[i];
         }
 
-        std::string endpoint = "/v2/stocks/snapshots?symbols=" + symbol_param;
-
         httplib::Client client(environment_.getAPIDataURL()); // Initialize HTTP client
-        auto res = client.Get(endpoint.c_str()); // Perform GET request to retrieve snapshot data
 
         client.set_default_headers(headers(environment_, userAgent));
+
+        std::string endpoint = "/v2/stocks/snapshots?symbols=" + symbol_param;
+        auto res = client.Get(endpoint.c_str()); // Perform GET request to retrieve snapshot data
 
         if (!res) {
             return {Status(false, "HTTP request failed"), trades};
