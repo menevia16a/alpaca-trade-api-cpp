@@ -1091,77 +1091,73 @@ namespace alpaca {
 
     std::pair<Status, Bars> Client::getBars(const std::vector<std::string>& symbols, const std::string& start, const std::string& end, const std::string& after, const std::string& until, const std::string& timeframe, const uint limit, const std::string& userAgent) const {
         Bars bars;
-
         httplib::Client client(environment_.getAPIDataURL());
         client.set_default_headers(headers(environment_, userAgent)); // Set headers before requests
 
         for (const auto& symbol : symbols) {
-            httplib::Params params {
-                {"timeframe", timeframe},
-                {"limit", std::to_string(limit)}
-            };
+            std::string next_page_token;
+            uint retrieved_count = 0;
 
-            if (!start.empty())
-                params.insert({"start", start});
+            while (true) {
+                httplib::Params params {
+                    {"timeframe", timeframe},
+                    {"limit", std::to_string(limit - retrieved_count)}
+                };
 
-            if (!end.empty())
-                params.insert({"end", end});
+                if (!start.empty()) params.insert({"start", start});
+                if (!end.empty()) params.insert({"end", end});
+                if (!after.empty()) params.insert({"after", after});
+                if (!until.empty()) params.insert({"until", until});
+                if (!next_page_token.empty()) params.insert({"page_token", next_page_token});
 
-            if (!after.empty())
-                params.insert({"after", after});
+                auto query_string = httplib::detail::params_to_query_str(params);
+                std::string url = "/v2/stocks/" + symbol + "/bars?" + query_string;
+                auto resp = client.Get(url.c_str());
 
-            if (!until.empty())
-                params.insert({"until", until});
+                if (!resp) {
+                    std::ostringstream ss;
+                    ss << "Call to " << url << " returned an empty response";
+                    return std::make_pair(Status(1, ss.str()), bars);
+                }
 
-            auto query_string = httplib::detail::params_to_query_str(params);
-            std::string url = "/v2/stocks/" + symbol + "/bars?" + query_string;
-            auto resp = client.Get(url.c_str());
+                if (resp->status != 200) {
+                    std::ostringstream ss;
+                    ss << "Call to " << url << " returned an HTTP " << resp->status << ": " << resp->body;
+                    return std::make_pair(Status(1, ss.str()), bars);
+                }
 
-            if (!resp) {
-                std::ostringstream ss;
-                ss << "Call to " << url << " returned an empty response";
-                return std::make_pair(Status(1, ss.str()), bars);
-            }
+                // Parse the JSON response and add it to `bars`
+                rapidjson::Document doc;
+                doc.Parse(resp->body.c_str());
 
-            if (resp->status != 200) {
-                std::ostringstream ss;
-                ss << "Call to " << url << " returned an HTTP " << resp->status << ": " << resp->body;
-                return std::make_pair(Status(1, ss.str()), bars);
-            }
+                if (doc.HasParseError()) {
+                    return std::make_pair(Status(1, "Failed to parse JSON response"), bars);
+                }
 
-            // Parse the JSON response and add it to `bars`
-            Status parseStatus = bars.fromJSON(resp->body);
-            if (!parseStatus.ok()) {
-                return std::make_pair(parseStatus, bars);
+                if (doc.HasMember("bars") && doc["bars"].IsArray()) {
+                    for (const auto& bar_data : doc["bars"].GetArray()) {
+                        Bar bar;
+                        // Assuming Bar class has a fromDocument method or similar
+                        if (auto status = bar.fromDocument(bar_data); !status.ok()) {
+                            return std::make_pair(status, bars);
+                        }
+                        bars.bars[symbol].push_back(bar);
+                        retrieved_count++;
+                    }
+                }
+
+                if (doc.HasMember("next_page_token") && doc["next_page_token"].IsString()) {
+                    next_page_token = doc["next_page_token"].GetString();
+                } else {
+                    break; // No more pages
+                }
+
+                // Stop if we've retrieved enough bars to meet the limit
+                if (retrieved_count >= limit) break;
             }
         }
 
         return std::make_pair(Status(), bars);
-    }
-
-    std::pair<Status, LastQuote> Client::getLastQuote(const std::string& symbol, const std::string& userAgent) const {
-        LastQuote last_quote;
-        auto url = "/v2/last_quote/stocks/" + symbol;
-        httplib::Client client(environment_.getAPIDataURL());
-        auto resp = client.Get(url.c_str(), headers(environment_, userAgent));
-
-        if (!resp) {
-            std::ostringstream ss;
-
-            ss << "Call to " << url << " returned an empty response";
-
-            return std::make_pair(Status(1, ss.str()), last_quote);
-        }
-
-        if (resp->status != 200) {
-            std::ostringstream ss;
-
-            ss << "Call to " << url << " returned an HTTP " << resp->status << ": " << resp->body;
-
-            return std::make_pair(Status(1, ss.str()), last_quote);
-        }
-
-        return std::make_pair(last_quote.fromJSON(resp->body), last_quote);
     }
 
     std::pair<Status, std::unordered_map<std::string, Trade>> Client::getLatestTrades(const std::vector<std::string>& symbols, const std::string& userAgent) const {
