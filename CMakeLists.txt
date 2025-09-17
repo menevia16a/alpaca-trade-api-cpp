@@ -14,7 +14,7 @@ file(GLOB ALPACA_SOURCES
 # Create a static library
 add_library(alpaca STATIC ${ALPACA_SOURCES})
 
-# Cross-platform include directories
+# Public include for project headers
 target_include_directories(alpaca PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # --- Dependencies ---
@@ -31,24 +31,32 @@ target_link_libraries(alpaca PRIVATE CURL::libcurl)
 find_package(glog REQUIRED)
 target_link_libraries(alpaca PRIVATE glog::glog)
 
-# JSON (using nlohmann/json or jsoncpp)
+# JSON
 find_package(jsoncpp REQUIRED)
 target_link_libraries(alpaca PRIVATE jsoncpp)
 
-# libwebsockets (platform-specific handling)
+# libwebsockets
 if(WIN32)
-    # Assume installed via vcpkg or manually
-    find_path(LWS_INCLUDE_DIR "libwebsockets.h")
-    find_library(LWS_LIB "libwebsockets")
+    # vcpkg provides libwebsockets config
+    find_package(libwebsockets CONFIG REQUIRED)
+
+    # Prefer shared, fallback to static if that’s what’s installed
+    if(TARGET websockets_shared)
+        target_link_libraries(alpaca PRIVATE websockets_shared)
+    elseif(TARGET websockets_static)
+        target_link_libraries(alpaca PRIVATE websockets_static)
+    else()
+        message(FATAL_ERROR "No libwebsockets target found (expected websockets_shared or websockets_static)")
+    endif()
 else()
-    # Linux/macOS
+    # Linux (system-installed libwebsockets)
     find_path(LWS_INCLUDE_DIR NAMES libwebsockets.h PATHS /usr/include /usr/local/include)
     find_library(LWS_LIB NAMES websockets libwebsockets PATHS /usr/lib /usr/local/lib)
-endif()
 
-if(NOT LWS_INCLUDE_DIR OR NOT LWS_LIB)
-    message(FATAL_ERROR "libwebsockets not found!")
-endif()
+    if(NOT LWS_INCLUDE_DIR OR NOT LWS_LIB)
+        message(FATAL_ERROR "libwebsockets not found!")
+    endif()
 
-target_include_directories(alpaca PRIVATE ${LWS_INCLUDE_DIR})
-target_link_libraries(alpaca PRIVATE ${LWS_LIB})
+    target_include_directories(alpaca PRIVATE ${LWS_INCLUDE_DIR})
+    target_link_libraries(alpaca PRIVATE ${LWS_LIB})
+endif()
