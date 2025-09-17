@@ -5,9 +5,10 @@
 namespace alpaca {
     std::string assetClassToString(const AssetClass asset_class) {
         switch (asset_class) {
-
-        case USEquity:
-            return "us_equity";
+            case USEquity:
+                return "us_equity";
+            default:
+                return "unknown";
         }
     }
 

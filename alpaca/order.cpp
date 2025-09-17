@@ -5,62 +5,72 @@
 namespace alpaca {
     std::string orderDirectionToString(const OrderDirection direction) {
         switch (direction) {
-        case OrderDirection::Ascending:
-            return "asc";
-        case OrderDirection::Descending:
-            return "desc";
+            case OrderDirection::Ascending:
+                return "asc";
+            case OrderDirection::Descending:
+                return "desc";
+            default:
+                return "unknown";
         }
     }
 
     std::string orderSideToString(const OrderSide side) {
         switch (side) {
-        case OrderSide::Buy:
-            return "buy";
-        case OrderSide::Sell:
-            return "sell";
+            case OrderSide::Buy:
+                return "buy";
+            case OrderSide::Sell:
+                return "sell";
+            default:
+                return "unknown";
         }
     }
 
     std::string orderTypeToString(const OrderType type) {
         switch (type) {
-        case OrderType::Market:
-            return "market";
-        case OrderType::Limit:
-            return "limit";
-        case OrderType::Stop:
-            return "stop";
-        case OrderType::StopLimit:
-            return "stop_limit";
+            case OrderType::Market:
+                return "market";
+            case OrderType::Limit:
+                return "limit";
+            case OrderType::Stop:
+                return "stop";
+            case OrderType::StopLimit:
+                return "stop_limit";
+            default:
+                return "unknown";
         }
     }
 
     std::string orderTimeInForceToString(const OrderTimeInForce tif) {
         switch (tif) {
-        case OrderTimeInForce::Day:
-            return "day";
-        case OrderTimeInForce::GoodUntilCanceled:
-            return "gtc";
-        case OrderTimeInForce::OPG:
-            return "opg";
-        case OrderTimeInForce::CLS:
-            return "cls";
-        case OrderTimeInForce::ImmediateOrCancel:
-            return "ioc";
-        case OrderTimeInForce::FillOrKill:
-            return "fok";
+            case OrderTimeInForce::Day:
+                return "day";
+            case OrderTimeInForce::GoodUntilCanceled:
+                return "gtc";
+            case OrderTimeInForce::OPG:
+                return "opg";
+            case OrderTimeInForce::CLS:
+                return "cls";
+            case OrderTimeInForce::ImmediateOrCancel:
+                return "ioc";
+            case OrderTimeInForce::FillOrKill:
+                return "fok";
+            default:
+                return "unknown";
         }
     }
 
     std::string orderClassToString(const OrderClass order_class) {
         switch (order_class) {
-        case OrderClass::Simple:
-            return "simple";
-        case OrderClass::Bracket:
-            return "bracket";
-        case OrderClass::OneCancelsOther:
-            return "oco";
-        case OrderClass::OneTriggersOther:
-            return "oto";
+            case OrderClass::Simple:
+                return "simple";
+            case OrderClass::Bracket:
+                return "bracket";
+            case OrderClass::OneCancelsOther:
+                return "oco";
+            case OrderClass::OneTriggersOther:
+                return "oto";
+            default:
+                return "unknown";
         }
     }
 
