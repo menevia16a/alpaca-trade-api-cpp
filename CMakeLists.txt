@@ -31,9 +31,20 @@ target_link_libraries(alpaca PRIVATE CURL::libcurl)
 find_package(glog REQUIRED)
 target_link_libraries(alpaca PRIVATE glog::glog)
 
-# JSON
+# JSON (cross-platform)
 find_package(jsoncpp REQUIRED)
-target_link_libraries(alpaca PRIVATE jsoncpp)
+
+# Prefer the imported target if available (Windows/vcpkg)
+if (WIN32)
+    if(TARGET jsoncpp::jsoncpp)
+        target_link_libraries(alpaca PRIVATE jsoncpp::jsoncpp)
+    elseif(TARGET jsoncpp)
+        # Fallback for Linux system package
+        target_link_libraries(alpaca PRIVATE jsoncpp)
+    else()
+        message(FATAL_ERROR "jsoncpp target not found")
+    endif()
+endif()
 
 # libwebsockets
 if(WIN32)
