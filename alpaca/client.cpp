@@ -1089,14 +1089,14 @@ namespace alpaca {
         return std::make_pair(portfolio_history.fromJSON(resp->body), portfolio_history);
     }
 
-    std::pair<Status, Bars> Client::getBars(const std::vector<std::string>& symbols, const std::string& start, const std::string& end, const std::string& after, const std::string& until, const std::string& timeframe, const uint limit, const std::string& userAgent) const {
+    std::pair<Status, Bars> Client::getBars(const std::vector<std::string>& symbols, const std::string& start, const std::string& end, const std::string& after, const std::string& until, const std::string& timeframe, const uint32_t limit, const std::string& userAgent) const {
         Bars bars;
         httplib::Client client(environment_.getAPIDataURL());
         client.set_default_headers(headers(environment_, userAgent)); // Set headers before requests
 
         for (const auto& symbol : symbols) {
             std::string next_page_token;
-            uint retrieved_count = 0;
+            uint32_t retrieved_count = 0;
 
             while (true) {
                 httplib::Params params {

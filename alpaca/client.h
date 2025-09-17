@@ -21,6 +21,7 @@
 #include <utility>
 #include <variant>
 #include <vector>
+#include <cstdint>
 
 namespace alpaca {
     /**
@@ -63,7 +64,7 @@ namespace alpaca {
         * @endcode
         *
         * @return a std::pair where the first element is a Status indicating the
-        * success or faliure of the operation and the second element is an
+        * success or failure of the operation and the second element is an
         * alpaca::Account object.
         */
         std::pair<Status, Account> getAccount(const std::string& userAgent = "") const;
@@ -131,8 +132,8 @@ namespace alpaca {
         *   }
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an
         * alpaca::AccountConfigurations object.
         */
         std::pair<Status, AccountConfigurations> getAccountConfigurations(const std::string& userAgent = "") const;
@@ -156,8 +157,8 @@ namespace alpaca {
         * types. A full list of available activity types can be found on the docs:
         * https://alpaca.markets/docs/api-documentation/api-v2/account-activities/#activity-types
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is either an
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is either an
         * alpaca::TradeActivity object or an alpaca::NonTradeActivity object.
         */
         std::pair<Status, std::vector<std::variant<TradeActivity, NonTradeActivity>>> getAccountActivity(const std::vector<std::string>& activity_types = {}, const std::string& userAgent = "") const;
@@ -174,8 +175,8 @@ namespace alpaca {
         *   }
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an
         * alpaca::AccountConfigurations object.
         */
         std::pair<Status, AccountConfigurations> updateAccountConfigurations(const bool no_shorting, const std::string& dtbp_check, const std::string& trade_confirm_email, const bool suspend_trade, const std::string& userAgent = "") const;
@@ -194,8 +195,8 @@ namespace alpaca {
         *   LOG(INFO) << "Number of orders: " << orders.size();
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is a vector of
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is a vector of
         * alpaca::Order objects.
         */
         std::pair<Status, std::vector<Order>> getOrders(const ActionStatus status = ActionStatus::Open, const int limit = 50, const std::string& after = "", const std::string& until = "", const OrderDirection = OrderDirection::Descending, const bool nested = false, const std::string& userAgent = "") const;
@@ -214,8 +215,8 @@ namespace alpaca {
         *   LOG(INFO) << "Client order identifier: " << order.client_order_id;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Order object.
         */
         std::pair<Status, Order> getOrder(const std::string& id, const bool nested = false, const std::string& userAgent = "") const;
@@ -234,8 +235,8 @@ namespace alpaca {
         *   LOG(INFO) << "Client order identifier: " << order.client_order_id;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Order object.
         */
         std::pair<Status, Order> getOrderByClientOrderID(const std::string& client_order_id, const std::string& userAgent = "") const;
@@ -260,8 +261,8 @@ namespace alpaca {
         *   LOG(INFO) << "Client Order Identifier: " << order.client_order_id;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is the newly
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is the newly
         * created alpaca::Order object.
         */
         std::pair<Status, Order> submitOrder(const std::string& symbol, const int quantity, const OrderSide side, const OrderType type, const OrderTimeInForce tif, const std::string& limit_price = "", const std::string& stop_price = "", const bool extended_hours = false, const std::string& client_order_id = "", const OrderClass order_class = OrderClass::Simple, TakeProfitParams* take_profit_params = nullptr, StopLossParams* stop_loss_params = nullptr, const std::string& userAgent = "") const;
@@ -284,8 +285,8 @@ namespace alpaca {
         *   LOG(INFO) << "Client Order Identifier: " << order.client_order_id;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is the newly
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is the newly
         * created alpaca::Order object.
         */
         std::pair<Status, Order> replaceOrder(const std::string& id, const int quantity, const OrderTimeInForce tif, const std::string& limit_price = "", const std::string& stop_price = "", const std::string& client_order_id = "", const std::string& userAgent = "") const;
@@ -304,8 +305,8 @@ namespace alpaca {
         *   LOG(INFO) << "Number of orders: " << orders.size();
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is a vector of
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is a vector of
         * alpaca::Order objects.
         */
         std::pair<Status, std::vector<Order>> cancelOrders(const std::string& userAgent = "") const;
@@ -324,8 +325,8 @@ namespace alpaca {
         *   LOG(INFO) << "Order identifier: " << order.id;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Order object.
         */
         std::pair<Status, Order> cancelOrder(const std::string& id, const std::string& userAgent = "") const;
@@ -344,8 +345,8 @@ namespace alpaca {
         *   LOG(INFO) << "Number of positions: " << positions.size();
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is a vector of
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is a vector of
         * alpaca::Position objects.
         */
         std::pair<Status, std::vector<Position>> getPositions(const std::string& userAgent = "") const;
@@ -364,8 +365,8 @@ namespace alpaca {
         *   LOG(INFO) << "Asset class: " << position.asset_class;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Position object.
         */
         std::pair<Status, Position> getPosition(const std::string& symbol, const std::string& userAgent = "") const;
@@ -384,8 +385,8 @@ namespace alpaca {
         *   LOG(INFO) << "Number of positions: " << positions.size();
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is a vector of
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is a vector of
         * alpaca::Position objects.
         */
         std::pair<Status, std::vector<Position>> closePositions(const std::string& userAgent = "") const;
@@ -404,8 +405,8 @@ namespace alpaca {
         *   LOG(INFO) << "Asset identifier: " << position.asset_id;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Position object.
         */
         std::pair<Status, Position> closePosition(const std::string& symbol, const std::string& userAgent = "") const;
@@ -424,8 +425,8 @@ namespace alpaca {
         *   LOG(INFO) << "Number of assets: " << assets.size();
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is a vector of
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is a vector of
         * alpaca::Asset objects.
         */
         std::pair<Status, std::vector<Asset>> getAssets(const AssetClass asset_class = AssetClass::USEquity, const ActionStatus asset_status = ActionStatus::Active, const std::string& exchange = "NYSE", const std::string& userAgent = "") const;
@@ -444,8 +445,8 @@ namespace alpaca {
         *   LOG(INFO) << "Asset class: " << asset.asset_class;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Asset object.
         */
         std::pair<Status, Asset> getAsset(const std::string& symbol, const std::string& userAgent = "") const;
@@ -464,8 +465,8 @@ namespace alpaca {
         *   LOG(INFO) << "Next open: " << clock.next_open;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Clock object.
         */
         std::pair<Status, Clock> getClock(const std::string& userAgent = "") const;
@@ -488,8 +489,8 @@ namespace alpaca {
         *   }
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is vector of
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is vector of
         * alpaca::Calendar objects.
         */
         std::pair<Status, std::vector<Date>> getCalendar(const std::string& start, const std::string& end, const std::string& userAgent = "") const;
@@ -508,8 +509,8 @@ namespace alpaca {
         *   LOG(INFO) << "Number of watchlists: " << watchlists.size();
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is a vector of
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is a vector of
         * alpaca::Watchlist objects.
         */
         std::pair<Status, std::vector<Watchlist>> getWatchlists(const std::string& userAgent = "") const;
@@ -528,8 +529,8 @@ namespace alpaca {
         *   LOG(INFO) << "Watchlist name: " << watchlist.name;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Watchlist object.
         */
         std::pair<Status, Watchlist> getWatchlist(const std::string& id, const std::string& userAgent = "") const;
@@ -548,8 +549,8 @@ namespace alpaca {
         *   LOG(INFO) << "Watchlist name: " << watchlist.name;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Watchlist object.
         */
         std::pair<Status, Watchlist> createWatchlist(const std::string& name, const std::vector<std::string>& symbols, const std::string& userAgent = "") const;
@@ -570,8 +571,8 @@ namespace alpaca {
         *   LOG(INFO) << "Watchlist name: " << watchlist.name;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Watchlist object.
         */
         std::pair<Status, Watchlist> updateWatchlist(const std::string& id, const std::string& name, const std::vector<std::string>& symbols, const std::string& userAgent = "") const;
@@ -588,7 +589,7 @@ namespace alpaca {
         *   }
         * @endcode
         *
-        * @return a Status indicating the success or faliure of the operation
+        * @return a Status indicating the success or failure of the operation
         */
         Status deleteWatchlist(const std::string& id, const std::string& userAgent = "") const;
 
@@ -606,8 +607,8 @@ namespace alpaca {
         *   LOG(INFO) << "Watchlist name: " << watchlist.name;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Watchlist object.
         */
         std::pair<Status, Watchlist> addSymbolToWatchlist(const std::string& id, const std::string& symbol, const std::string& userAgent = "") const;
@@ -626,8 +627,8 @@ namespace alpaca {
         *   LOG(INFO) << "Watchlist name: " << watchlist.name;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Watchlist object.
         */
         std::pair<Status, Watchlist> removeSymbolFromWatchlist(const std::string& id, const std::string& symbol, const std::string& userAgent = "") const;
@@ -646,8 +647,8 @@ namespace alpaca {
         *   LOG(INFO) << "Latest equity value: " << portfolio_history.equity.back();
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::PortfolioHistory object.
         */
         std::pair<Status, PortfolioHistory> getPortfolioHistory(const std::string& period = "", const std::string& timeframe = "", const std::string& date_end = "", const bool extended_hours = false, const std::string& userAgent = "") const;
@@ -668,11 +669,11 @@ namespace alpaca {
         *   }
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::Bars object.
         */
-        std::pair<Status, Bars> getBars(const std::vector<std::string>& symbols, const std::string& start, const std::string& end, const std::string& after = "", const std::string& until = "", const std::string& timeframe = "1D", const uint limit = 100, const std::string& userAgent = "") const;
+        std::pair<Status, Bars> getBars(const std::vector<std::string>& symbols, const std::string& start, const std::string& end, const std::string& after = "", const std::string& until = "", const std::string& timeframe = "1D", const uint32_t limit = 100, const std::string& userAgent = "") const;
 
         /**
         * @brief Fetch last trade details for a symbol.
@@ -688,8 +689,8 @@ namespace alpaca {
         *   LOG(INFO) << "Latest price: " << last_trade.trade.price;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::LastTrade object.
         */
         std::pair<Status, LastTrade> getLastTrade(const std::string& symbol, const std::string& userAgent = "") const;
@@ -708,8 +709,8 @@ namespace alpaca {
         *   LOG(INFO) << "Latest ask price: " << last_quote.quote.ask_price;
         * @endcode
         *
-        * @return a std::pair where the first elemennt is a Status indicating the
-        * success or faliure of the operation and the second element is an instance
+        * @return a std::pair where the first element is a Status indicating the
+        * success or failure of the operation and the second element is an instance
         * of an alpaca::LastQuote object.
         */
         std::pair<Status, LastQuote> getLastQuote(const std::string& symbol, const std::string& userAgent = "") const;
