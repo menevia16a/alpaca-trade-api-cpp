@@ -663,7 +663,7 @@ namespace alpaca {
         std::vector<Asset> assets;
         std::string classParam = assetClassToString(asset_class);
         std::string statusParam = actionStatusToString(asset_status);
-        std::string url = "/v2/assets?asset_class=" + classParam + "&status=" + statusParam + "&exchange=" + exchange + "&tradable=true";
+        std::string url = "/v2/assets?asset_class=" + classParam + "&status=" + statusParam + "&exchange=" + exchange;
         httplib::Client client(environment_.getAPIBaseURL());
         auto resp = client.Get(url.c_str(), headers(environment_, userAgent));
 
@@ -1104,11 +1104,20 @@ namespace alpaca {
                     {"limit", std::to_string(limit - retrieved_count)}
                 };
 
-                if (!start.empty()) params.insert({"start", start});
-                if (!end.empty()) params.insert({"end", end});
-                if (!after.empty()) params.insert({"after", after});
-                if (!until.empty()) params.insert({"until", until});
-                if (!next_page_token.empty()) params.insert({"page_token", next_page_token});
+                if (!start.empty())
+                    params.insert({"start", start});
+
+                if (!end.empty())
+                    params.insert({"end", end});
+
+                if (!after.empty())
+                    params.insert({"after", after});
+
+                if (!until.empty())
+                    params.insert({"until", until});
+
+                if (!next_page_token.empty())
+                    params.insert({"next_page_token", next_page_token});
 
                 auto query_string = httplib::detail::params_to_query_str(params);
                 std::string url = "/v2/stocks/" + symbol + "/bars?" + query_string;
@@ -1116,13 +1125,17 @@ namespace alpaca {
 
                 if (!resp) {
                     std::ostringstream ss;
+
                     ss << "Call to " << url << " returned an empty response";
+
                     return std::make_pair(Status(1, ss.str()), bars);
                 }
 
                 if (resp->status != 200) {
                     std::ostringstream ss;
+
                     ss << "Call to " << url << " returned an HTTP " << resp->status << ": " << resp->body;
+
                     return std::make_pair(Status(1, ss.str()), bars);
                 }
 
@@ -1130,27 +1143,27 @@ namespace alpaca {
                 rapidjson::Document doc;
                 doc.Parse(resp->body.c_str());
 
-                if (doc.HasParseError()) {
+                if (doc.HasParseError())
                     return std::make_pair(Status(1, "Failed to parse JSON response"), bars);
-                }
 
                 if (doc.HasMember("bars") && doc["bars"].IsArray()) {
                     for (const auto& bar_data : doc["bars"].GetArray()) {
                         Bar bar;
+
                         // Assuming Bar class has a fromDocument method or similar
-                        if (auto status = bar.fromDocument(bar_data); !status.ok()) {
-                            return std::make_pair(status, bars);
+                        if (auto status = bar.fromDocument(bar_data)) {
+                            if (status.ok()) {
+                                bars.bars[symbol].push_back(bar);
+                                retrieved_count++;
+                            }
                         }
-                        bars.bars[symbol].push_back(bar);
-                        retrieved_count++;
                     }
                 }
 
-                if (doc.HasMember("next_page_token") && doc["next_page_token"].IsString()) {
+                if (doc.HasMember("next_page_token") && doc["next_page_token"].IsString())
                     next_page_token = doc["next_page_token"].GetString();
-                } else {
+                else
                     break; // No more pages
-                }
 
                 // Stop if we've retrieved enough bars to meet the limit
                 if (retrieved_count >= limit) break;
@@ -1163,16 +1176,14 @@ namespace alpaca {
     std::pair<Status, std::unordered_map<std::string, Trade>> Client::getLatestTrades(const std::vector<std::string>& symbols, const std::string& userAgent) const {
         std::unordered_map<std::string, Trade> trades;
 
-        if (symbols.empty()) {
+        if (symbols.empty())
             return {Status(true, "No symbols provided"), trades};
-        }
 
         // Construct the comma-separated symbols parameter
         std::string symbol_param = symbols[0];
 
-        for (size_t i = 1; i < symbols.size(); ++i) {
+        for (size_t i = 1; i < symbols.size(); ++i)
             symbol_param += "," + symbols[i];
-        }
 
         httplib::Client client(environment_.getAPIDataURL()); // Initialize HTTP client
 
@@ -1181,9 +1192,8 @@ namespace alpaca {
         std::string endpoint = "/v2/stocks/snapshots?symbols=" + symbol_param;
         auto res = client.Get(endpoint.c_str()); // Perform GET request to retrieve snapshot data
 
-        if (!res) {
+        if (!res)
             return {Status(false, "HTTP request failed"), trades};
-        }
 
         if (res->status != 200) {
             return {Status(false, "HTTP error: " + std::to_string(res->status)), trades};

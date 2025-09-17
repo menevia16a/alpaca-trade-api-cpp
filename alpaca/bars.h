@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <cstdint>
 
 namespace alpaca {
     /**
@@ -32,8 +33,8 @@ namespace alpaca {
         Status fromDocument(const rapidjson::GenericValue<rapidjson::UTF8<char>, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>>& d);
 
     public:
-        uint time;
-        uint volume;
+        uint32_t time;
+        uint32_t volume;
 
         double open_price;
         double high_price;
